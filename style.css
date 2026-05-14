@@ -423,6 +423,124 @@ input[type="email"]:focus { outline: none; }
 
 
 /* ════════════════════════════════════════════════════════
+   PRICING CARDS
+════════════════════════════════════════════════════════ */
+
+.pricing-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.pricing-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Most-popular card — slightly larger + shadow + pulsing badge */
+.pricing-popular {
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.18);
+}
+
+@media (min-width: 1024px) {
+  .pricing-popular {
+    transform: scale(1.04);
+  }
+  .pricing-popular:hover {
+    transform: scale(1.04) translateY(-4px);
+  }
+}
+
+.pricing-popular:hover {
+  box-shadow: 0 20px 44px rgba(249, 115, 22, 0.28);
+}
+
+@keyframes popularBadgePulse {
+  0%, 100% { transform: translateX(-50%) scale(1); }
+  50%      { transform: translateX(-50%) scale(1.06); }
+}
+
+.popular-badge {
+  animation: popularBadgePulse 2.6s ease-in-out infinite;
+}
+
+
+/* ════════════════════════════════════════════════════════
+   FAQ ACCORDION
+════════════════════════════════════════════════════════ */
+
+.faq-question {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.18s ease;
+}
+
+.faq-question:hover {
+  background-color: #FFF7ED;
+}
+
+.faq-chevron {
+  transition: transform 0.3s ease;
+}
+
+.faq-item.open .faq-chevron {
+  transform: rotate(180deg);
+  color: #F97316;
+}
+
+.faq-item.open .faq-question {
+  background-color: #FFF7ED;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.faq-item.open .faq-answer {
+  max-height: 500px;
+}
+
+
+/* ════════════════════════════════════════════════════════
+   SERVICES PAGE — feature detail icon
+════════════════════════════════════════════════════════ */
+
+.feature-detail-icon {
+  width: 144px;
+  height: 144px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-detail-icon:hover {
+  transform: translateY(-3px) rotate(-2deg);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Active nav link (services page) — orange underline */
+.nav-link-active {
+  position: relative;
+}
+
+.nav-link-active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -22px;
+  height: 2px;
+  background: #F97316;
+  border-radius: 2px;
+}
+
+
+/* ════════════════════════════════════════════════════════
    ACCESSIBILITY — Reduced Motion
    Disable all animations / motion for users who prefer it.
 ════════════════════════════════════════════════════════ */
@@ -450,7 +568,11 @@ input[type="email"]:focus { outline: none; }
   .float-icon,
   .cta-dot,
   .ai-badge,
+  .popular-badge,
   .step-connector line { animation: none !important; }
+
+  /* Make sure FAQ accordion still toggles instantly */
+  .faq-answer { transition: none !important; }
 }
 
 

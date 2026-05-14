@@ -188,6 +188,23 @@ function setupStatCounters() {
 }
 
 
+/* ── FAQ accordion ─────────────────────────────────────── */
+function setupFAQ() {
+  const items = document.querySelectorAll(".faq-item");
+  if (!items.length) return;
+
+  items.forEach(item => {
+    const btn = item.querySelector(".faq-question");
+    if (!btn) return;
+
+    btn.addEventListener("click", () => {
+      const isOpen = item.classList.toggle("open");
+      btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    });
+  });
+}
+
+
 /* ── Init ──────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof lucide !== "undefined") lucide.createIcons();
@@ -199,4 +216,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupSmoothScroll();
   setupScrollReveal();
   setupStatCounters();
+  setupFAQ();
 });
