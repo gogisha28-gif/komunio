@@ -1,3 +1,9 @@
+/* ═══════════════════════════════════════════════════════
+   Komunios — style.css
+   Custom styles layered on top of Tailwind CDN.
+═══════════════════════════════════════════════════════ */
+
+
 /* ─── Base ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -15,16 +21,45 @@ body {
 }
 
 
-/* ─── Hero entrance animation ──────────────────────────── */
+/* ─── Section pill labels (with small dot) ─────────────── */
+.section-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px;
+}
+
+.pill-dot {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 8px;
+  opacity: 0.75;
+}
+
+
+/* ════════════════════════════════════════════════════════
+   HERO
+════════════════════════════════════════════════════════ */
+
+/* Faint dot pattern overlay */
+.hero-bg-dots {
+  background-image: radial-gradient(circle, #1E293B 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: 0 0;
+  opacity: 0.04;
+}
+
+/* Hero entrance animation */
 @keyframes heroFadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(18px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .hero-item {
@@ -39,7 +74,61 @@ body {
 .hero-delay-4 { animation-delay: 0.54s; }
 
 
-/* ─── Scroll-reveal base state ─────────────────────────── */
+/* ─── Hero illustration sizing ─────────────────────────── */
+.hero-illustration {
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+}
+@media (min-width: 1024px) {
+  .hero-illustration { max-width: 400px; }
+}
+
+
+/* ─── Window lights — sequential glow ──────────────────── */
+.window {
+  fill: #1E293B;
+  fill-opacity: 0.12;
+  animation: windowGlow 6s ease-in-out infinite;
+}
+
+@keyframes windowGlow {
+  0%, 25%, 100%  { fill: #1E293B; fill-opacity: 0.12; }
+  40%, 70%       { fill: #FBBF24; fill-opacity: 1; }
+}
+
+.window-1 { animation-delay: 0.0s; }
+.window-2 { animation-delay: 0.5s; }
+.window-3 { animation-delay: 1.0s; }
+.window-4 { animation-delay: 1.5s; }
+.window-5 { animation-delay: 2.0s; }
+.window-6 { animation-delay: 2.5s; }
+.window-7 { animation-delay: 3.0s; }
+.window-8 { animation-delay: 3.5s; }
+
+
+/* ─── Floating icons — gentle up/down with pulse ───────── */
+.float-icon {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: floatY 3.6s ease-in-out infinite;
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+.float-1 { animation-delay: 0s;   }
+.float-2 { animation-delay: 0.9s; }
+.float-3 { animation-delay: 1.8s; }
+.float-4 { animation-delay: 2.7s; }
+
+
+/* ════════════════════════════════════════════════════════
+   SCROLL REVEAL
+════════════════════════════════════════════════════════ */
+
 .reveal-item {
   opacity: 0;
   transform: translateY(16px);
@@ -52,112 +141,250 @@ body {
 }
 
 
-/* ─── Section pill labels ──────────────────────────────── */
-.section-pill {
-  display: inline-block;
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-}
+/* ════════════════════════════════════════════════════════
+   BUTTONS
+════════════════════════════════════════════════════════ */
 
-
-/* ─── Button hover scale ────────────────────────────────── */
 .btn-hover {
   transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
+
 .btn-hover:hover {
   transform: scale(1.02);
-  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.25);
+  box-shadow: 0 4px 18px rgba(249, 115, 22, 0.28);
 }
+
 .btn-hover:active {
   transform: scale(0.98);
 }
 
+/* Arrow slides right on button hover */
+.arrow-icon {
+  transition: transform 0.22s ease;
+}
 
-/* ─── Card hover — lift + shadow ───────────────────────── */
+.btn-hover:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+
+/* ════════════════════════════════════════════════════════
+   FEATURE CARDS
+════════════════════════════════════════════════════════ */
+
 .feature-card,
 .problem-card,
 .stat-card,
-.step-card {
-  transition: transform 0.22s ease, box-shadow 0.22s ease;
+.step-card,
+.story-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.feature-card,
+.problem-card,
+.stat-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.feature-card p,
+.problem-card p {
+  flex: 1;
 }
 
 .feature-card:hover,
 .problem-card:hover,
 .stat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
 }
 
-/* Step cards have a lighter lift */
-.step-card:hover {
+.step-card:hover,
+.story-card:hover {
   transform: translateY(-2px);
 }
 
-/* Feature card — flex layout for consistent heights */
-.feature-card {
-  display: flex;
-  flex-direction: column;
+/* Feature icon wrapper — subtle gradient + glow on hover */
+.feature-icon-wrap {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
-.feature-card p {
-  flex: 1;
+
+.feature-icon-wrap.orange {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
+  color: #F97316;
+}
+
+.feature-icon-wrap.emerald {
+  background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+  color: #10B981;
+}
+
+.feature-card:hover .feature-icon-wrap.orange {
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.08), 0 6px 16px rgba(249, 115, 22, 0.18);
+  transform: scale(1.04);
+}
+
+.feature-card:hover .feature-icon-wrap.emerald {
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.08), 0 6px 16px rgba(16, 185, 129, 0.18);
+  transform: scale(1.04);
+}
+
+/* AI card — extra prominence */
+.ai-card {
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.12);
+}
+
+.ai-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 36px rgba(249, 115, 22, 0.22);
+}
+
+.ai-icon-wrap {
+  background: linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%) !important;
 }
 
 
-/* ─── AI badge pulse ────────────────────────────────────── */
+/* ─── AI badge pulse ───────────────────────────────────── */
 @keyframes badgePulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.65; }
+  50%      { opacity: 0.65; }
 }
+
 .ai-badge {
   animation: badgePulse 2.8s ease-in-out infinite;
 }
 
 
-/* ─── Comparison table reveal ───────────────────────────── */
-.comparison-table {
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+/* ════════════════════════════════════════════════════════
+   STORY CARDS (Visual Story section)
+════════════════════════════════════════════════════════ */
+
+.story-icon-bg {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.story-card:hover .story-icon-bg {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
 
-/* ─── Success message reveal ────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   SECTION BACKGROUND TEXTURES
+════════════════════════════════════════════════════════ */
+
+/* Problem section — faint dot grid */
+.section-bg-dots {
+  background-image: radial-gradient(circle, #1E293B 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.025;
+}
+
+/* Features section — soft orange blur top-right */
+.features-blur {
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.18) 0%, rgba(249, 115, 22, 0) 70%);
+  filter: blur(20px);
+}
+
+
+/* ════════════════════════════════════════════════════════
+   HOW-IT-WORKS — animated dashed line
+════════════════════════════════════════════════════════ */
+
+.step-connector {
+  height: 4px;
+  width: 100%;
+}
+
+.step-connector line {
+  stroke-dasharray: 6 6;
+  animation: dashFlow 18s linear infinite;
+}
+
+@keyframes dashFlow {
+  to { stroke-dashoffset: -200; }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   FINAL CTA — floating dots
+════════════════════════════════════════════════════════ */
+
+.cta-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0.35;
+  animation: ctaFloat 5s ease-in-out infinite;
+}
+
+.cta-dot:nth-child(1) { animation-delay: 0s;   }
+.cta-dot:nth-child(2) { animation-delay: 0.9s; }
+.cta-dot:nth-child(3) { animation-delay: 1.8s; }
+.cta-dot:nth-child(4) { animation-delay: 2.5s; }
+.cta-dot:nth-child(5) { animation-delay: 3.2s; }
+
+@keyframes ctaFloat {
+  0%, 100% { transform: translateY(0)   scale(1);   opacity: 0.3;  }
+  50%      { transform: translateY(-14px) scale(1.2); opacity: 0.55; }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   STAT COUNT-UP (number remains crisp during animation)
+════════════════════════════════════════════════════════ */
+
+.stat-num {
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+}
+
+
+/* ════════════════════════════════════════════════════════
+   FORM SUCCESS MESSAGE
+════════════════════════════════════════════════════════ */
+
 .show-success {
   display: flex !important;
   animation: successFade 0.35s ease;
 }
+
 @keyframes successFade {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 
-/* ─── Navbar shadow on scroll ───────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   NAVBAR
+════════════════════════════════════════════════════════ */
+
 #navbar.scrolled {
   box-shadow: 0 1px 16px rgba(0, 0, 0, 0.07);
 }
 
-
-/* ─── Mobile menu slide-down ────────────────────────────── */
 #mobile-menu {
   animation: slideDown 0.2s ease;
 }
+
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 
-/* ─── How-it-works connecting line ─────────────────────── */
-/* The line sits between step 1 and step 3 — only visible md+ */
-#how-it-works .grid {
-  position: relative;
-}
+/* ════════════════════════════════════════════════════════
+   FOOTER SOCIAL ICONS
+════════════════════════════════════════════════════════ */
 
-
-/* ─── Social icons ──────────────────────────────────────── */
 .social-icon {
   display: inline-flex;
   align-items: center;
@@ -167,33 +394,65 @@ body {
   border-radius: 50%;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
+
 .social-icon:hover {
   background-color: #FFF7ED;
 }
 
 
-/* ─── Focus ring polish ─────────────────────────────────── */
-input[type="email"]:focus {
-  outline: none;
-}
+/* ════════════════════════════════════════════════════════
+   FOCUS / INPUT POLISH
+════════════════════════════════════════════════════════ */
+
+input[type="email"]:focus { outline: none; }
 
 
-/* ─── Stat numbers — slight shimmer on load ─────────────── */
-.stat-card .text-4xl {
-  font-variant-numeric: tabular-nums;
-}
+/* ════════════════════════════════════════════════════════
+   RESPONSIVE TYPOGRAPHY
+════════════════════════════════════════════════════════ */
 
-
-/* ─── Responsive typography ─────────────────────────────── */
 @media (max-width: 480px) {
   h1 { font-size: 2.1rem; line-height: 1.2; }
   h2 { font-size: 1.8rem; }
 }
 
 
-/* ─── Print ─────────────────────────────────────────────── */
+/* ════════════════════════════════════════════════════════
+   ACCESSIBILITY — Reduced Motion
+   Disable all animations / motion for users who prefer it.
+════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001s !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Make sure animated-in content is still visible */
+  .hero-item,
+  .reveal-item {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .window { fill: #FBBF24; fill-opacity: 0.9; }
+
+  .float-icon,
+  .cta-dot,
+  .ai-badge,
+  .step-connector line { animation: none !important; }
+}
+
+
+/* ════════════════════════════════════════════════════════
+   PRINT
+════════════════════════════════════════════════════════ */
+
 @media print {
-  #navbar, form, footer { display: none; }
-  .reveal-item { opacity: 1 !important; transform: none !important; }
-  .hero-item   { opacity: 1 !important; }
+  #navbar, form, footer, .hero-bg-dots, .cta-dots, .features-blur, .section-bg-dots { display: none; }
+  .reveal-item, .hero-item { opacity: 1 !important; transform: none !important; }
 }

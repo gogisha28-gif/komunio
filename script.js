@@ -1,22 +1,21 @@
-/* ─────────────────────────────────────────────────────────
-   Komunios — script.js
-   Handles: email forms, navbar, mobile menu, animations
-───────────────────────────────────────────────────────── */
-
-
 /* ═══════════════════════════════════════════════════════════
-   ⚠️  FORMSPREE SETUP — REPLACE BEFORE GOING LIVE
-   ─────────────────────────────────────────────────────────
-   1. Create a free account at https://formspree.io
-   2. Create a new form, copy the form's endpoint URL
-   3. Replace YOUR_FORM_ID below with the ID from that URL
-      (e.g. if Formspree gives you https://formspree.io/f/xyzabcde,
-       replace YOUR_FORM_ID with xyzabcde)
+   Komunios — script.js
+   Forms, navbar, mobile menu, scroll reveal, count-up stats
 ═══════════════════════════════════════════════════════════ */
+
+
+/* ─────────────────────────────────────────────────────────
+   ⚠️  FORMSPREE — replace YOUR_FORM_ID with your real ID
+   ───────────────────────────────────────────────────────── */
 const FORMSPREE_ENDPOINT = "https://formspree.io/f/maqvzkzb";
 
 
-// ── Local backup storage (fallback if Formspree fails) ───
+/* ── Motion preference (respect users who want less motion) */
+const prefersReducedMotion =
+  window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+
+/* ── Email storage (local backup) ──────────────────────── */
 function saveEmail(email) {
   try {
     const stored = JSON.parse(localStorage.getItem("komunios_emails") || "[]");
@@ -24,7 +23,7 @@ function saveEmail(email) {
       stored.push(email);
       localStorage.setItem("komunios_emails", JSON.stringify(stored));
     }
-  } catch (_) { /* localStorage unavailable — silently ignore */ }
+  } catch (_) { /* localStorage unavailable */ }
 }
 
 function isValidEmail(email) {
@@ -32,24 +31,18 @@ function isValidEmail(email) {
 }
 
 
-// ── Send email to Formspree ──────────────────────────────
+/* ── Send to Formspree ─────────────────────────────────── */
 async function sendToFormspree(email, source) {
-  // If endpoint hasn't been set yet, skip the network call.
   if (FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID")) {
-    console.warn("⚠️  Formspree endpoint not configured. Email saved locally only.");
+    console.warn("⚠️  Formspree endpoint not configured.");
     return false;
   }
-
   try {
     const res = await fetch(FORMSPREE_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-      },
+      headers: { "Accept": "application/json", "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: email,
-        source: source,           // "hero" or "cta" — see which form converted
+        email, source,
         page: window.location.href,
         timestamp: new Date().toISOString(),
       }),
@@ -62,14 +55,14 @@ async function sendToFormspree(email, source) {
 }
 
 
-// ── Form handler ─────────────────────────────────────────
+/* ── Form handler ──────────────────────────────────────── */
 function setupForm(formId, emailId, successId, source) {
   const form    = document.getElementById(formId);
   const input   = document.getElementById(emailId);
   const success = document.getElementById(successId);
   if (!form) return;
 
-  form.addEventListener("submit", async function (e) {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const email = input.value.trim();
 
@@ -82,15 +75,10 @@ function setupForm(formId, emailId, successId, source) {
       return;
     }
 
-    // Always save locally as backup
     saveEmail(email);
-
-    // Show success immediately — don't make user wait on network
     form.style.display = "none";
     success.classList.add("show-success");
 
-    // Fire-and-forget Formspree send. If it fails, the email is still
-    // safe in localStorage and the user sees the same success message.
     const sent = await sendToFormspree(email, source);
     console.log(sent
       ? `✅ ${email} delivered to Formspree (source: ${source})`
@@ -103,89 +91,112 @@ function setupForm(formId, emailId, successId, source) {
 }
 
 
-// ── Navbar shadow on scroll ──────────────────────────────
+/* ── Navbar shadow on scroll ───────────────────────────── */
 function setupNavbar() {
   const navbar = document.getElementById("navbar");
   if (!navbar) return;
-
-  const onScroll = () => {
-    navbar.classList.toggle("scrolled", window.scrollY > 10);
-  };
-
+  const onScroll = () => navbar.classList.toggle("scrolled", window.scrollY > 10);
   window.addEventListener("scroll", onScroll, { passive: true });
   onScroll();
 }
 
 
-// ── Mobile menu ──────────────────────────────────────────
+/* ── Mobile menu ───────────────────────────────────────── */
 function setupMobileMenu() {
   const toggle = document.getElementById("menu-toggle");
   const menu   = document.getElementById("mobile-menu");
   if (!toggle || !menu) return;
 
-  toggle.addEventListener("click", () => {
-    menu.classList.toggle("hidden");
-  });
-
+  toggle.addEventListener("click", () => menu.classList.toggle("hidden"));
   menu.querySelectorAll("a").forEach(link => {
     link.addEventListener("click", () => menu.classList.add("hidden"));
   });
 }
 
 
-// ── Smooth scroll ────────────────────────────────────────
+/* ── Smooth scroll ─────────────────────────────────────── */
 function setupSmoothScroll() {
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener("click", function (e) {
       const target = document.querySelector(this.getAttribute("href"));
       if (target) {
         e.preventDefault();
-        target.scrollIntoView({ behavior: "smooth" });
+        target.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth" });
       }
     });
   });
 }
 
 
-// ── Scroll-reveal with stagger ───────────────────────────
+/* ── Scroll-reveal with stagger ────────────────────────── */
 function setupScrollReveal() {
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const siblings = Array.from(entry.target.parentElement.children).filter(
+        el => el.classList.contains("reveal-item")
+      );
+      const idx = siblings.indexOf(entry.target);
+      const delay = prefersReducedMotion ? 0 : idx * 90;
+      setTimeout(() => entry.target.classList.add("revealed"), delay);
+      observer.unobserve(entry.target);
+    });
+  }, { threshold: 0.08, rootMargin: "0px 0px -36px 0px" });
 
-        // Read sibling index for stagger delay
-        const siblings = Array.from(entry.target.parentElement.children).filter(
-          el => el.classList.contains("reveal-item")
-        );
-        const idx = siblings.indexOf(entry.target);
-        const delay = idx * 90; // 90ms per card
-
-        setTimeout(() => {
-          entry.target.classList.add("revealed");
-        }, delay);
-
-        observer.unobserve(entry.target);
-      });
-    },
-    { threshold: 0.08, rootMargin: "0px 0px -36px 0px" }
-  );
-
-  document.querySelectorAll(".reveal-item").forEach(el => {
-    observer.observe(el);
-  });
+  document.querySelectorAll(".reveal-item").forEach(el => observer.observe(el));
 }
 
 
-// ── Init ─────────────────────────────────────────────────
+/* ── Stat count-up animation ───────────────────────────── */
+function animateNumber(el, target, duration) {
+  // Honour reduced-motion preference
+  if (prefersReducedMotion) {
+    el.textContent = target;
+    return;
+  }
+
+  const startTime = performance.now();
+  const startVal  = 0;
+
+  function tick(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    // ease-out cubic for a satisfying decel
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(startVal + (target - startVal) * eased);
+    el.textContent = current;
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function setupStatCounters() {
+  const nums = document.querySelectorAll(".stat-num");
+  if (!nums.length) return;
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      const target = parseInt(el.dataset.target, 10) || 0;
+      animateNumber(el, target, 1500);
+      observer.unobserve(el);
+    });
+  }, { threshold: 0.5 });
+
+  nums.forEach(el => observer.observe(el));
+}
+
+
+/* ── Init ──────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
-  // Render Lucide <i data-lucide="..."> → SVG
   if (typeof lucide !== "undefined") lucide.createIcons();
 
   setupForm("hero-form", "hero-email", "hero-success", "hero");
-  setupForm("cta-form",  "cta-email",  "cta-success", "cta");
+  setupForm("cta-form",  "cta-email",  "cta-success",  "cta");
   setupNavbar();
   setupMobileMenu();
   setupSmoothScroll();
   setupScrollReveal();
+  setupStatCounters();
 });
