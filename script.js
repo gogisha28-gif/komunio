@@ -4,13 +4,27 @@
 ───────────────────────────────────────────────────────── */
 
 
-// ── Email storage ────────────────────────────────────────
+/* ═══════════════════════════════════════════════════════════
+   ⚠️  FORMSPREE SETUP — REPLACE BEFORE GOING LIVE
+   ─────────────────────────────────────────────────────────
+   1. Create a free account at https://formspree.io
+   2. Create a new form, copy the form's endpoint URL
+   3. Replace YOUR_FORM_ID below with the ID from that URL
+      (e.g. if Formspree gives you https://formspree.io/f/xyzabcde,
+       replace YOUR_FORM_ID with xyzabcde)
+═══════════════════════════════════════════════════════════ */
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
+
+
+// ── Local backup storage (fallback if Formspree fails) ───
 function saveEmail(email) {
-  const stored = JSON.parse(localStorage.getItem("komunios_emails") || "[]");
-  if (!stored.includes(email)) {
-    stored.push(email);
-    localStorage.setItem("komunios_emails", JSON.stringify(stored));
-  }
+  try {
+    const stored = JSON.parse(localStorage.getItem("komunios_emails") || "[]");
+    if (!stored.includes(email)) {
+      stored.push(email);
+      localStorage.setItem("komunios_emails", JSON.stringify(stored));
+    }
+  } catch (_) { /* localStorage unavailable — silently ignore */ }
 }
 
 function isValidEmail(email) {
@@ -18,14 +32,44 @@ function isValidEmail(email) {
 }
 
 
+// ── Send email to Formspree ──────────────────────────────
+async function sendToFormspree(email, source) {
+  // If endpoint hasn't been set yet, skip the network call.
+  if (FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID")) {
+    console.warn("⚠️  Formspree endpoint not configured. Email saved locally only.");
+    return false;
+  }
+
+  try {
+    const res = await fetch(FORMSPREE_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: email,
+        source: source,           // "hero" or "cta" — see which form converted
+        page: window.location.href,
+        timestamp: new Date().toISOString(),
+      }),
+    });
+    return res.ok;
+  } catch (err) {
+    console.warn("Formspree submission failed:", err);
+    return false;
+  }
+}
+
+
 // ── Form handler ─────────────────────────────────────────
-function setupForm(formId, emailId, successId) {
+function setupForm(formId, emailId, successId, source) {
   const form    = document.getElementById(formId);
   const input   = document.getElementById(emailId);
   const success = document.getElementById(successId);
   if (!form) return;
 
-  form.addEventListener("submit", function (e) {
+  form.addEventListener("submit", async function (e) {
     e.preventDefault();
     const email = input.value.trim();
 
@@ -38,12 +82,19 @@ function setupForm(formId, emailId, successId) {
       return;
     }
 
+    // Always save locally as backup
     saveEmail(email);
+
+    // Show success immediately — don't make user wait on network
     form.style.display = "none";
     success.classList.add("show-success");
 
-    console.log("📧 Registered:", email);
-    console.log("📋 All registrations:", JSON.parse(localStorage.getItem("komunios_emails") || "[]"));
+    // Fire-and-forget Formspree send. If it fails, the email is still
+    // safe in localStorage and the user sees the same success message.
+    const sent = await sendToFormspree(email, source);
+    console.log(sent
+      ? `✅ ${email} delivered to Formspree (source: ${source})`
+      : `📦 ${email} saved locally only (source: ${source})`);
   });
 
   input.addEventListener("input", () => {
@@ -131,8 +182,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Render Lucide <i data-lucide="..."> → SVG
   if (typeof lucide !== "undefined") lucide.createIcons();
 
-  setupForm("hero-form", "hero-email", "hero-success");
-  setupForm("cta-form",  "cta-email",  "cta-success");
+  setupForm("hero-form", "hero-email", "hero-success", "hero");
+  setupForm("cta-form",  "cta-email",  "cta-success", "cta");
   setupNavbar();
   setupMobileMenu();
   setupSmoothScroll();
