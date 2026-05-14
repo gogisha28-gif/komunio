@@ -541,6 +541,177 @@ input[type="email"]:focus { outline: none; }
 
 
 /* ════════════════════════════════════════════════════════
+   ABOUT PAGE — mission, values, team cards
+════════════════════════════════════════════════════════ */
+
+.mission-card,
+.value-card,
+.team-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.mission-card:hover,
+.value-card:hover,
+.team-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+}
+
+/* Team avatar — gentle scale on card hover */
+.team-avatar {
+  transition: transform 0.3s ease;
+}
+
+.team-card:hover .team-avatar {
+  transform: scale(1.06);
+}
+
+
+/* ════════════════════════════════════════════════════════
+   BLOG CARDS
+════════════════════════════════════════════════════════ */
+
+.blog-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.09);
+}
+
+/* Image block heights */
+.blog-card-image {
+  height: 180px;
+  transition: transform 0.4s ease;
+}
+
+.blog-card-image-sm {
+  height: 140px;
+  transition: transform 0.4s ease;
+}
+
+.blog-card:hover .blog-card-image,
+.blog-card:hover .blog-card-image-sm {
+  transform: scale(1.04);
+}
+
+/* Make sure image stays clipped during hover-zoom */
+.blog-card { overflow: hidden; }
+
+
+/* ════════════════════════════════════════════════════════
+   ARTICLE BODY (blog post pages)
+════════════════════════════════════════════════════════ */
+
+.article-hero-image {
+  height: 280px;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .article-hero-image { height: 360px; }
+}
+
+.article-body {
+  font-size: 1.0625rem;        /* 17px — comfortable reading */
+  line-height: 1.8;
+  color: #334155;              /* slate-700 — softer than dark */
+}
+
+.article-body p {
+  margin-bottom: 1.4em;
+}
+
+.article-body .article-lead {
+  font-size: 1.25rem;
+  line-height: 1.65;
+  color: #1E293B;
+  font-weight: 500;
+  margin-bottom: 2em;
+}
+
+.article-body h2 {
+  font-size: 1.625rem;         /* 26px */
+  font-weight: 700;
+  color: #1E293B;
+  line-height: 1.3;
+  margin-top: 2.4em;
+  margin-bottom: 0.8em;
+}
+
+.article-body h2:first-of-type {
+  margin-top: 1.8em;
+}
+
+.article-body ul {
+  margin: 1em 0 1.8em 0;
+  padding-left: 0;
+  list-style: none;
+}
+
+.article-body ul li {
+  position: relative;
+  padding-left: 1.5em;
+  margin-bottom: 0.7em;
+  line-height: 1.7;
+}
+
+.article-body ul li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.7em;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #F97316;
+}
+
+.article-body strong {
+  color: #1E293B;
+  font-weight: 600;
+}
+
+/* Pull quote — orange italic, visually distinct */
+.article-quote {
+  margin: 2.4em 0;
+  padding: 1.6em 1.8em;
+  border-left: 4px solid #F97316;
+  background: #FFF7ED;
+  border-radius: 0 16px 16px 0;
+  font-size: 1.3rem;
+  font-style: italic;
+  font-weight: 500;
+  color: #EA580C;
+  line-height: 1.5;
+}
+
+/* Conclusion — slightly larger, dark, semibold */
+.article-conclusion {
+  margin-top: 2em;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #1E293B;
+  line-height: 1.6;
+}
+
+.article-body a {
+  color: #F97316;
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.article-body a:hover {
+  color: #EA580C;
+}
+
+
+/* ════════════════════════════════════════════════════════
    ACCESSIBILITY — Reduced Motion
    Disable all animations / motion for users who prefer it.
 ════════════════════════════════════════════════════════ */
