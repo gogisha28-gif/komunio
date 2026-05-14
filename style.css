@@ -1,9 +1,9 @@
-/* ─── Base ─────────────────────────────────────────── */
+/* ─── Base ─────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 72px; /* offset for sticky nav */
+  scroll-padding-top: 72px;
 }
 
 body {
@@ -14,21 +14,90 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Navbar shadow on scroll ───────────────────────── */
-#navbar.scrolled {
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
+
+/* ─── Hero entrance animation ──────────────────────────── */
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-/* ─── Problem cards — subtle hover lift ─────────────── */
-.problem-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.hero-item {
+  opacity: 0;
+  animation: heroFadeUp 0.6s ease-out forwards;
 }
-.problem-card:hover {
+
+.hero-delay-0 { animation-delay: 0.05s; }
+.hero-delay-1 { animation-delay: 0.18s; }
+.hero-delay-2 { animation-delay: 0.30s; }
+.hero-delay-3 { animation-delay: 0.42s; }
+.hero-delay-4 { animation-delay: 0.54s; }
+
+
+/* ─── Scroll-reveal base state ─────────────────────────── */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+}
+
+.reveal-item.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+/* ─── Section pill labels ──────────────────────────────── */
+.section-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+}
+
+
+/* ─── Button hover scale ────────────────────────────────── */
+.btn-hover {
+  transition: background-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+.btn-hover:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.25);
+}
+.btn-hover:active {
+  transform: scale(0.98);
+}
+
+
+/* ─── Card hover — lift + shadow ───────────────────────── */
+.feature-card,
+.problem-card,
+.stat-card,
+.step-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.feature-card:hover,
+.problem-card:hover,
+.stat-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
 }
 
-/* ─── Feature grid — consistent card heights ────────── */
+/* Step cards have a lighter lift */
+.step-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Feature card — flex layout for consistent heights */
 .feature-card {
   display: flex;
   flex-direction: column;
@@ -37,56 +106,64 @@ body {
   flex: 1;
 }
 
-/* ─── AI card pulse on the badge ────────────────────── */
-@keyframes badge-pulse {
+
+/* ─── AI badge pulse ────────────────────────────────────── */
+@keyframes badgePulse {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.7; }
+  50%       { opacity: 0.65; }
 }
-.feature-card .absolute {
-  animation: badge-pulse 2.8s ease-in-out infinite;
+.ai-badge {
+  animation: badgePulse 2.8s ease-in-out infinite;
 }
 
-/* ─── Smooth success message reveal ─────────────────── */
+
+/* ─── Comparison table reveal ───────────────────────────── */
+.comparison-table {
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+
+/* ─── Success message reveal ────────────────────────────── */
 .show-success {
   display: flex !important;
-  animation: fadeIn 0.35s ease;
+  animation: successFade 0.35s ease;
 }
-@keyframes fadeIn {
+@keyframes successFade {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Button active press feel ───────────────────────── */
-button[type="submit"]:active {
-  transform: scale(0.97);
+
+/* ─── Navbar shadow on scroll ───────────────────────────── */
+#navbar.scrolled {
+  box-shadow: 0 1px 16px rgba(0, 0, 0, 0.07);
 }
 
-/* ─── Mobile menu transition ────────────────────────── */
+
+/* ─── Mobile menu slide-down ────────────────────────────── */
 #mobile-menu {
   animation: slideDown 0.2s ease;
 }
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Comparison table — equal column widths ─────────── */
-.grid.grid-cols-2 > div {
-  min-height: 64px;
+
+/* ─── How-it-works connecting line ─────────────────────── */
+/* The line sits between step 1 and step 3 — only visible md+ */
+#how-it-works .grid {
+  position: relative;
 }
 
-/* ─── Focus ring polish ──────────────────────────────── */
-input[type="email"]:focus {
-  outline: none;
-}
 
-/* ─── Footer social icons ────────────────────────────── */
+/* ─── Social icons ──────────────────────────────────────── */
 .social-icon {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
@@ -94,13 +171,29 @@ input[type="email"]:focus {
   background-color: #FFF7ED;
 }
 
-/* ─── Responsive typography tweaks ──────────────────── */
-@media (max-width: 480px) {
-  h1 { font-size: 2rem; line-height: 1.2; }
-  h2 { font-size: 1.75rem; }
+
+/* ─── Focus ring polish ─────────────────────────────────── */
+input[type="email"]:focus {
+  outline: none;
 }
 
-/* ─── Print — hide nav & CTAs ────────────────────────── */
+
+/* ─── Stat numbers — slight shimmer on load ─────────────── */
+.stat-card .text-4xl {
+  font-variant-numeric: tabular-nums;
+}
+
+
+/* ─── Responsive typography ─────────────────────────────── */
+@media (max-width: 480px) {
+  h1 { font-size: 2.1rem; line-height: 1.2; }
+  h2 { font-size: 1.8rem; }
+}
+
+
+/* ─── Print ─────────────────────────────────────────────── */
 @media print {
   #navbar, form, footer { display: none; }
+  .reveal-item { opacity: 1 !important; transform: none !important; }
+  .hero-item   { opacity: 1 !important; }
 }

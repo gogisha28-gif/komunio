@@ -1,0 +1,18 @@
+# Local Claude Code config
+.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (in case you add tooling later)
+node_modules/
+
+# Netlify
+.netlify/

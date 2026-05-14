@@ -1,9 +1,10 @@
-/* ─────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────
    Komunios — script.js
-   Handles: email forms, navbar scroll, mobile menu
-───────────────────────────────────────────────────── */
+   Handles: email forms, navbar, mobile menu, animations
+───────────────────────────────────────────────────────── */
 
-// ── Email storage ──────────────────────────────────────
+
+// ── Email storage ────────────────────────────────────────
 function saveEmail(email) {
   const stored = JSON.parse(localStorage.getItem("komunios_emails") || "[]");
   if (!stored.includes(email)) {
@@ -16,17 +17,16 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
-// ── Form handler factory ───────────────────────────────
+
+// ── Form handler ─────────────────────────────────────────
 function setupForm(formId, emailId, successId) {
   const form    = document.getElementById(formId);
   const input   = document.getElementById(emailId);
   const success = document.getElementById(successId);
-
   if (!form) return;
 
   form.addEventListener("submit", function (e) {
     e.preventDefault();
-
     const email = input.value.trim();
 
     if (!isValidEmail(email)) {
@@ -34,68 +34,55 @@ function setupForm(formId, emailId, successId) {
       input.focus();
       setTimeout(() => {
         input.classList.remove("border-red-400", "ring-2", "ring-red-200");
-      }, 2000);
+      }, 2200);
       return;
     }
 
     saveEmail(email);
-
-    // Hide form, show success
     form.style.display = "none";
     success.classList.add("show-success");
 
-    // Log to console for developer reference
     console.log("📧 Registered:", email);
     console.log("📋 All registrations:", JSON.parse(localStorage.getItem("komunios_emails") || "[]"));
   });
 
-  // Clear red border on typing
-  input.addEventListener("input", function () {
+  input.addEventListener("input", () => {
     input.classList.remove("border-red-400", "ring-2", "ring-red-200");
   });
 }
 
-// ── Navbar: shadow on scroll ───────────────────────────
+
+// ── Navbar shadow on scroll ──────────────────────────────
 function setupNavbar() {
   const navbar = document.getElementById("navbar");
   if (!navbar) return;
 
   const onScroll = () => {
-    if (window.scrollY > 10) {
-      navbar.classList.add("scrolled");
-    } else {
-      navbar.classList.remove("scrolled");
-    }
+    navbar.classList.toggle("scrolled", window.scrollY > 10);
   };
 
   window.addEventListener("scroll", onScroll, { passive: true });
-  onScroll(); // run once on load
+  onScroll();
 }
 
-// ── Mobile menu toggle ─────────────────────────────────
+
+// ── Mobile menu ──────────────────────────────────────────
 function setupMobileMenu() {
   const toggle = document.getElementById("menu-toggle");
   const menu   = document.getElementById("mobile-menu");
   if (!toggle || !menu) return;
 
   toggle.addEventListener("click", () => {
-    const isOpen = !menu.classList.contains("hidden");
-    if (isOpen) {
-      menu.classList.add("hidden");
-    } else {
-      menu.classList.remove("hidden");
-    }
+    menu.classList.toggle("hidden");
   });
 
-  // Close mobile menu when any link inside it is clicked
   menu.querySelectorAll("a").forEach(link => {
-    link.addEventListener("click", () => {
-      menu.classList.add("hidden");
-    });
+    link.addEventListener("click", () => menu.classList.add("hidden"));
   });
 }
 
-// ── Smooth scroll for nav links ────────────────────────
+
+// ── Smooth scroll ────────────────────────────────────────
 function setupSmoothScroll() {
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener("click", function (e) {
@@ -108,30 +95,42 @@ function setupSmoothScroll() {
   });
 }
 
-// ── Scroll-reveal animation ────────────────────────────
+
+// ── Scroll-reveal with stagger ───────────────────────────
 function setupScrollReveal() {
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("opacity-100", "translate-y-0");
-          entry.target.classList.remove("opacity-0", "translate-y-4");
-          observer.unobserve(entry.target);
-        }
+        if (!entry.isIntersecting) return;
+
+        // Read sibling index for stagger delay
+        const siblings = Array.from(entry.target.parentElement.children).filter(
+          el => el.classList.contains("reveal-item")
+        );
+        const idx = siblings.indexOf(entry.target);
+        const delay = idx * 90; // 90ms per card
+
+        setTimeout(() => {
+          entry.target.classList.add("revealed");
+        }, delay);
+
+        observer.unobserve(entry.target);
       });
     },
-    { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+    { threshold: 0.08, rootMargin: "0px 0px -36px 0px" }
   );
 
-  const targets = document.querySelectorAll(".problem-card, .feature-card");
-  targets.forEach(el => {
-    el.classList.add("opacity-0", "translate-y-4", "transition-all", "duration-500");
+  document.querySelectorAll(".reveal-item").forEach(el => {
     observer.observe(el);
   });
 }
 
-// ── Init ───────────────────────────────────────────────
+
+// ── Init ─────────────────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
+  // Render Lucide <i data-lucide="..."> → SVG
+  if (typeof lucide !== "undefined") lucide.createIcons();
+
   setupForm("hero-form", "hero-email", "hero-success");
   setupForm("cta-form",  "cta-email",  "cta-success");
   setupNavbar();
