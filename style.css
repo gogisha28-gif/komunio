@@ -1,0 +1,106 @@
+/* ─── Base ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 72px; /* offset for sticky nav */
+}
+
+body {
+  font-family: "Noto Sans Georgian", sans-serif;
+  background-color: #FAFAF9;
+  color: #1E293B;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Navbar shadow on scroll ───────────────────────── */
+#navbar.scrolled {
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Problem cards — subtle hover lift ─────────────── */
+.problem-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.problem-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+}
+
+/* ─── Feature grid — consistent card heights ────────── */
+.feature-card {
+  display: flex;
+  flex-direction: column;
+}
+.feature-card p {
+  flex: 1;
+}
+
+/* ─── AI card pulse on the badge ────────────────────── */
+@keyframes badge-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+.feature-card .absolute {
+  animation: badge-pulse 2.8s ease-in-out infinite;
+}
+
+/* ─── Smooth success message reveal ─────────────────── */
+.show-success {
+  display: flex !important;
+  animation: fadeIn 0.35s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Button active press feel ───────────────────────── */
+button[type="submit"]:active {
+  transform: scale(0.97);
+}
+
+/* ─── Mobile menu transition ────────────────────────── */
+#mobile-menu {
+  animation: slideDown 0.2s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Comparison table — equal column widths ─────────── */
+.grid.grid-cols-2 > div {
+  min-height: 64px;
+}
+
+/* ─── Focus ring polish ──────────────────────────────── */
+input[type="email"]:focus {
+  outline: none;
+}
+
+/* ─── Footer social icons ────────────────────────────── */
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.social-icon:hover {
+  background-color: #FFF7ED;
+}
+
+/* ─── Responsive typography tweaks ──────────────────── */
+@media (max-width: 480px) {
+  h1 { font-size: 2rem; line-height: 1.2; }
+  h2 { font-size: 1.75rem; }
+}
+
+/* ─── Print — hide nav & CTAs ────────────────────────── */
+@media print {
+  #navbar, form, footer { display: none; }
+}
