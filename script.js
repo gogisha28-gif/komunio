@@ -13,7 +13,7 @@
       (e.g. if Formspree gives you https://formspree.io/f/xyzabcde,
        replace YOUR_FORM_ID with xyzabcde)
 ═══════════════════════════════════════════════════════════ */
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/YOUR_FORM_ID";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/maqvzkzb";
 
 
 // ── Local backup storage (fallback if Formspree fails) ───
