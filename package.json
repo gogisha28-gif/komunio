@@ -1,0 +1,9 @@
+{
+  "name": "komunios",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Komunios — Georgian community platform for apartment buildings",
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,14 @@
+# ═══════════════════════════════════════════════════════════
+# Netlify configuration for Komunios
+# ───────────────────────────────────────────────────────────
+# - publish = "." → static site is the project root
+# - functions live in netlify/functions/
+# - esbuild bundler keeps function cold-starts fast
+# ═══════════════════════════════════════════════════════════
+
+[build]
+  publish = "."
+
+[functions]
+  directory   = "netlify/functions"
+  node_bundler = "esbuild"

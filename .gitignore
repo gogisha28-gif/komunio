@@ -16,3 +16,8 @@ node_modules/
 
 # Netlify
 .netlify/
+
+# Local env vars — NEVER commit secrets like API keys
+.env
+.env.local
+.env.*.local

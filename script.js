@@ -205,6 +205,311 @@ function setupFAQ() {
 }
 
 
+/* ═══════════════════════════════════════════════════════════
+   CHAT WIDGET
+   Injects the floating launcher + chat window into every page,
+   manages messages, and forwards each user message to our
+   serverless function at /.netlify/functions/chat.
+
+   The Anthropic API key lives ONLY on the server. The browser
+   never sees it.
+═══════════════════════════════════════════════════════════ */
+
+const CHAT_ENDPOINT      = "/.netlify/functions/chat";
+const CHAT_STORAGE_KEY   = "komunios_chat_history";
+const CHAT_MAX_HISTORY   = 10;     // last N turns to send for context
+const CHAT_INITIAL_REPLY =
+`გამარჯობა! 👋 მე ვარ Komunios-ის ციფრული ასისტენტი. რით შემიძლია დაგეხმარო?
+
+შეგიძლია მკითხო:
+• რა ფიჩერები გვაქვს
+• ფასები
+• როგორ იწყება
+• ნებისმიერი სხვა კითხვა`;
+
+const CHAT_SUGGESTED = [
+  "რა განსხვავებაა სხვებისგან?",
+  "რა ღირს თვეში?",
+  "როდის გაიშვება?",
+];
+
+
+let chatMessages = [];   // [{role:'user'|'assistant', content:'...'}]
+let chatIsOpen   = false;
+let chatIsLoading = false;
+
+
+/* ── Inject widget HTML into <body> ────────────────────── */
+function injectChatWidget() {
+  // Avoid duplicate injection if script runs twice
+  if (document.getElementById("chat-launcher")) return;
+
+  const html = `
+    <button id="chat-launcher" class="chat-launcher" aria-label="გესაუბრე AI ასისტენტს">
+      <i data-lucide="message-circle"></i>
+      <span class="chat-tooltip">გესაუბრე ჩვენი AI ასისტენტს</span>
+    </button>
+
+    <div id="chat-window" class="chat-window hidden" role="dialog" aria-label="Komunios AI ასისტენტი">
+      <header class="chat-header">
+        <div class="chat-header-info">
+          <div class="chat-avatar">K</div>
+          <div>
+            <div class="chat-title">Komunios ასისტენტი</div>
+            <div class="chat-subtitle">
+              <span class="chat-status-dot"></span>
+              ცოცხალი AI · ქართულად
+            </div>
+          </div>
+        </div>
+        <button id="chat-close" class="chat-close" aria-label="დახურე ჩატი">
+          <i data-lucide="x"></i>
+        </button>
+      </header>
+
+      <div id="chat-messages" class="chat-messages" aria-live="polite"></div>
+
+      <form id="chat-form" class="chat-input-area" autocomplete="off">
+        <input id="chat-input" type="text" placeholder="დაწერე შენი კითხვა..." maxlength="1000" />
+        <button type="submit" id="chat-send" aria-label="გაგზავნე" disabled>
+          <i data-lucide="send"></i>
+        </button>
+      </form>
+    </div>
+  `;
+
+  const wrapper = document.createElement("div");
+  wrapper.innerHTML = html;
+  while (wrapper.firstChild) document.body.appendChild(wrapper.firstChild);
+}
+
+
+/* ── localStorage persistence ──────────────────────────── */
+function chatLoadHistory() {
+  try {
+    const raw = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) chatMessages = parsed;
+    }
+  } catch (_) {}
+}
+
+function chatSaveHistory() {
+  try {
+    // Keep only the last 30 turns in storage to avoid bloat
+    const toSave = chatMessages.slice(-30);
+    localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(toSave));
+  } catch (_) {}
+}
+
+
+/* ── Render helpers ────────────────────────────────────── */
+function chatScrollToBottom() {
+  const box = document.getElementById("chat-messages");
+  if (box) box.scrollTop = box.scrollHeight;
+}
+
+function chatRenderMessage(role, content, withChips = false) {
+  const box = document.getElementById("chat-messages");
+  if (!box) return;
+
+  const msg = document.createElement("div");
+  msg.className = `chat-msg ${role}`;
+
+  if (role === "assistant") {
+    const avatar = document.createElement("div");
+    avatar.className = "chat-msg-avatar";
+    avatar.textContent = "K";
+    msg.appendChild(avatar);
+  }
+
+  const bubble = document.createElement("div");
+  bubble.className = "chat-msg-bubble";
+  bubble.textContent = content;
+  msg.appendChild(bubble);
+
+  box.appendChild(msg);
+
+  // Suggested chips appear directly under the initial assistant message
+  if (withChips) {
+    const chips = document.createElement("div");
+    chips.className = "chat-chips";
+    chips.id = "chat-chips";
+    CHAT_SUGGESTED.forEach(q => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chat-chip";
+      chip.textContent = q;
+      chip.addEventListener("click", () => {
+        chatRemoveChips();
+        chatSendMessage(q);
+      });
+      chips.appendChild(chip);
+    });
+    box.appendChild(chips);
+  }
+
+  chatScrollToBottom();
+}
+
+function chatRemoveChips() {
+  const chips = document.getElementById("chat-chips");
+  if (chips) chips.remove();
+}
+
+function chatShowTyping() {
+  const box = document.getElementById("chat-messages");
+  if (!box || document.getElementById("chat-typing-indicator")) return;
+  const wrap = document.createElement("div");
+  wrap.id = "chat-typing-indicator";
+  wrap.className = "chat-typing";
+  wrap.innerHTML = "<span></span><span></span><span></span>";
+  box.appendChild(wrap);
+  chatScrollToBottom();
+}
+
+function chatHideTyping() {
+  const t = document.getElementById("chat-typing-indicator");
+  if (t) t.remove();
+}
+
+
+/* ── Open / close ──────────────────────────────────────── */
+function chatOpen() {
+  if (chatIsOpen) return;
+  chatIsOpen = true;
+
+  document.getElementById("chat-window").classList.remove("hidden");
+  document.getElementById("chat-launcher").classList.add("hidden");
+
+  // First-time open: render initial greeting + chips
+  if (chatMessages.length === 0) {
+    chatRenderMessage("assistant", CHAT_INITIAL_REPLY, true);
+  }
+
+  setTimeout(() => {
+    const input = document.getElementById("chat-input");
+    if (input) input.focus();
+  }, 50);
+}
+
+function chatClose() {
+  if (!chatIsOpen) return;
+  chatIsOpen = false;
+
+  document.getElementById("chat-window").classList.add("hidden");
+  document.getElementById("chat-launcher").classList.remove("hidden");
+}
+
+
+/* ── Send message → /.netlify/functions/chat ──────────── */
+async function chatSendMessage(text) {
+  const message = (text || "").trim();
+  if (!message || chatIsLoading) return;
+
+  chatRemoveChips();
+
+  // 1. Show user message immediately
+  chatRenderMessage("user", message);
+  chatMessages.push({ role: "user", content: message });
+  chatSaveHistory();
+
+  // 2. Lock input + show typing
+  chatSetLoading(true);
+  chatShowTyping();
+
+  // 3. Call serverless function
+  let reply;
+  try {
+    const res = await fetch(CHAT_ENDPOINT, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        message,
+        // Send only the most recent context (excluding the just-pushed message)
+        conversationHistory: chatMessages.slice(-CHAT_MAX_HISTORY - 1, -1),
+      }),
+    });
+
+    if (!res.ok) {
+      console.warn("Chat function returned non-OK:", res.status);
+      throw new Error(`HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    reply = (data && data.reply) ? data.reply : null;
+  } catch (err) {
+    console.error("Chat fetch failed:", err);
+    reply = null;
+  }
+
+  chatHideTyping();
+
+  if (reply) {
+    chatRenderMessage("assistant", reply);
+    chatMessages.push({ role: "assistant", content: reply });
+    chatSaveHistory();
+  } else {
+    const errorMsg = "ბოდიში, რაღაც ვერ მოხერხდა. სცადე ხელახლა.";
+    chatRenderMessage("assistant", errorMsg);
+    // Don't save error messages to history — they'd confuse the AI's context
+  }
+
+  chatSetLoading(false);
+}
+
+function chatSetLoading(loading) {
+  chatIsLoading = loading;
+  const input = document.getElementById("chat-input");
+  const send  = document.getElementById("chat-send");
+  if (input) input.disabled = loading;
+  if (send)  send.disabled  = loading || !(input && input.value.trim());
+}
+
+
+/* ── Wire up event listeners ────────────────────────────── */
+function setupChat() {
+  injectChatWidget();
+
+  // Render Lucide icons that were just injected
+  if (typeof lucide !== "undefined") lucide.createIcons();
+
+  // Restore saved conversation
+  chatLoadHistory();
+  if (chatMessages.length > 0) {
+    chatMessages.forEach(m => chatRenderMessage(m.role, m.content));
+  }
+
+  // Launcher
+  document.getElementById("chat-launcher").addEventListener("click", chatOpen);
+  document.getElementById("chat-close").addEventListener("click", chatClose);
+
+  // Form
+  const form  = document.getElementById("chat-form");
+  const input = document.getElementById("chat-input");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = input.value;
+    input.value = "";
+    chatSendMessage(text);
+    chatSetLoading(false);   // re-evaluates send button disabled state
+  });
+
+  // Enable send button only when input has content
+  input.addEventListener("input", () => {
+    const send = document.getElementById("chat-send");
+    if (send) send.disabled = chatIsLoading || !input.value.trim();
+  });
+
+  // Esc closes the chat
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && chatIsOpen) chatClose();
+  });
+}
+
+
 /* ── Init ──────────────────────────────────────────────── */
 document.addEventListener("DOMContentLoaded", () => {
   if (typeof lucide !== "undefined") lucide.createIcons();
@@ -217,4 +522,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupScrollReveal();
   setupStatCounters();
   setupFAQ();
+  setupChat();
 });
