@@ -174,15 +174,18 @@ function setupStatCounters() {
   const nums = document.querySelectorAll(".stat-num");
   if (!nums.length) return;
 
+  // threshold 0.2 (not 0.5) — on mobile/tall cards, 50% is rarely
+  // in view at once. rootMargin pulls the trigger zone up so it
+  // fires a bit BEFORE the card is even on-screen.
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (!entry.isIntersecting) return;
       const el = entry.target;
       const target = parseInt(el.dataset.target, 10) || 0;
-      animateNumber(el, target, 1500);
+      animateNumber(el, target, 2000);   // 2s as specified
       observer.unobserve(el);
     });
-  }, { threshold: 0.5 });
+  }, { threshold: 0.2, rootMargin: "0px 0px -50px 0px" });
 
   nums.forEach(el => observer.observe(el));
 }

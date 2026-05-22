@@ -541,6 +541,94 @@ input[type="email"]:focus { outline: none; }
 
 
 /* ════════════════════════════════════════════════════════
+   FULL SOLUTION — digital + hardware cards (2x2 grid)
+════════════════════════════════════════════════════════ */
+
+.solution-card {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.solution-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.solution-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+
+/* ─── Status badges ─────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 11px;
+  border-radius: 9999px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.status-badge.available {
+  background: #ECFDF5;
+  color: #047857;
+  border: 1px solid #A7F3D0;
+}
+
+.status-badge.soon {
+  background: #FFF7ED;
+  color: #C2410C;
+  border: 1px solid #FED7AA;
+}
+
+.status-badge.planned {
+  background: #F1F5F9;
+  color: #64748B;
+  border: 1px solid #CBD5E1;
+}
+
+
+/* ─── Comparison callout ─────────────────────────────────── */
+.comparison-callout {
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.08);
+  transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.comparison-callout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.15);
+}
+
+
+/* ─── Pilot CTA banner ─────────────────────────────────── */
+.pilot-banner {
+  position: relative;
+  overflow: hidden;
+}
+
+.pilot-banner::before {
+  content: "";
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 160px;
+  height: 160px;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.18) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+
+/* ════════════════════════════════════════════════════════
    ABOUT PAGE — mission, values, team cards
 ════════════════════════════════════════════════════════ */
 
